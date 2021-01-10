@@ -1,3 +1,3 @@
-module github.com/prashantkhandelwal/gocode/interestpackage/calc
+module interestpackage/calc
 
 go 1.15
