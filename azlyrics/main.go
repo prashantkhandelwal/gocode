@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -8,11 +9,13 @@ import (
 	"github.com/gocolly/colly"
 )
 
+// To marshal the reponse in JSON format
+// Export the fields in the struct.
 type Response struct {
-	artistname string
-	featartist string
-	songname   string
-	lyrics     string
+	Artistname string `json:"artist"`
+	Featartist string `json:"feat`
+	Songname   string `json:"song"`
+	Lyrics     string `json:lyrics"`
 }
 
 func format(text string) string {
@@ -21,8 +24,9 @@ func format(text string) string {
 	return t
 }
 
-func FetchLyrics(artistname, songname string) (response Response) {
+func FetchLyrics(artistname, songname string) (response *Response) {
 
+	resp := &Response{}
 	c := colly.NewCollector()
 
 	c.OnHTML(".col-xs-12.col-lg-8.text-center", func(e *colly.HTMLElement) {
@@ -30,33 +34,32 @@ func FetchLyrics(artistname, songname string) (response Response) {
 		var depth int = 8
 
 		artistname := e.DOM.Find(".lyricsh").Text()
-		response.artistname = strings.ReplaceAll(strings.TrimSpace(artistname), "Lyrics", "")
+		resp.Artistname = strings.ReplaceAll(strings.TrimSpace(artistname), "Lyrics", "")
 
 		songname := strings.ReplaceAll(e.DOM.Find(".col-xs-12.col-lg-8.text-center > b").Text(), "\"", "")
-		response.songname = strings.TrimSpace(songname)
+		resp.Songname = strings.TrimSpace(songname)
 
 		feat := e.DOM.Find(".feat")
 
 		if feat.Length() > 0 {
 			depth = 10
-			response.featartist = feat.Text()
+			resp.Featartist = feat.Text()
 		}
 
 		lyrics := e.DOM.Find(".col-xs-12.col-lg-8.text-center > div:nth-child(" + strconv.Itoa(depth) + ")").Text()
-		response.lyrics = strings.TrimSpace(lyrics)
+		resp.Lyrics = strings.TrimSpace(lyrics)
 
 	})
 
 	url := fmt.Sprintf("https://www.azlyrics.com/lyrics/%s/%s.html", artistname, songname)
 	c.Visit(url)
-
-	return response
+	return resp
 }
 
 func main() {
 	artistname := format("50 cent")
 	songname := format("candy shop")
-	response := FetchLyrics(artistname, songname)
-	fmt.Println(response.artistname)
-	fmt.Println(response.songname)
+	r := FetchLyrics(artistname, songname)
+	m, _ := json.Marshal(r)
+	fmt.Println(string(m))
 }
