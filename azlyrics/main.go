@@ -13,9 +13,9 @@ import (
 // Export the fields in the struct.
 type Response struct {
 	Artistname string `json:"artist"`
-	Featartist string `json:"feat`
+	Featartist string `json:"feat"`
 	Songname   string `json:"song"`
-	Lyrics     string `json:lyrics"`
+	Lyrics     string `json:"lyrics"`
 }
 
 func format(text string) string {
